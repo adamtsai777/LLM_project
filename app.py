@@ -84,7 +84,7 @@ button[data-baseweb="tab"]:hover {
 </style>
 """, unsafe_allow_html=True)
 
-tab1, tab2 = st.tabs(["📊 機器學習", "🤖 AI Agent（LangChain）"])
+tab1, tab2 = st.tabs(["📊 機器學習", "🤖 AI Agent"])
 
 
 # =========================
@@ -116,6 +116,15 @@ with tab1:
             )
 
             # =========================
+            # 選擇 不要的 欄位
+            # =========================
+            drop_cols = st.multiselect(
+                "選擇 不需要的欄位",
+                df.columns.tolist()
+            )
+            
+            
+            # =========================
             # Target 欄位
             # =========================
             target_col = st.selectbox(
@@ -140,16 +149,24 @@ with tab1:
             if st.button("🚀 開始模型訓練"):
 
                 try:
+
+                    # =========================
+                    # 刪除不需要欄位
+                    # =========================
+                    if drop_cols:
+                        df = df.drop(columns=drop_cols)
+                    
+                    
+                    # 轉 category
+                    for col in cat_cols:
+                        df[col] = df[col].astype("category")
+                    
                     # =========================
                     # 特徵 / Target
                     # =========================
                     X = df.drop(columns=[target_col])
                     y = df[target_col]
                     
-                    # 轉 category
-                    for col in cat_cols:
-                        df[col] = df[col].astype("category")
-
                     # # One-Hot Encoding
                     # X = pd.get_dummies(
                     #     X,
@@ -339,6 +356,10 @@ with tab1:
                     # X_train_transformed = clf.named_steps["preprocessor"].transform(X_train)
                     X_test_transformed = clf.named_steps["preprocessor"].transform(X_test)
                 
+                    # 轉 dense
+                    if hasattr(X_test_transformed, "toarray"):
+                        X_test_transformed = X_test_transformed.toarray()
+                
                     # 取得前處理後欄位名稱
                     feature_names = clf.named_steps["preprocessor"].get_feature_names_out()
 
@@ -346,7 +367,7 @@ with tab1:
                     clean_feature_names = [
                         re.sub(r'[\[\]<]', '', str(col)).replace(' ', '_')
                         for col in feature_names
-]
+                    ]
                     
                     # 建立乾淨欄名的 DataFrame
                     X_test_transformed_df = pd.DataFrame(
@@ -507,15 +528,25 @@ with tab1:
                         shap_df.head(10)
                     )
 
-                    # 匯出 CSV
-                    shap_df.to_csv(
-                        "shap_values_sample0.csv",
-                        index=False,
-                        encoding="utf-8-sig"
-                    )
+                    # # 匯出 CSV
+                    # shap_df.to_csv(
+                    #     "shap_values_sample0.csv",
+                    #     index=False,
+                    #     encoding="utf-8-sig"
+                    # )
 
-                    st.success("SHAP 數值已輸出：shap_values_sample0.csv")    
-                            
+                    # st.success("SHAP 數值已輸出：shap_values_sample0.csv") 
+                    csv_data = shap_df.head(10).to_csv(
+                    index=False,
+                    encoding="utf-8-sig"
+                    )
+                       
+                    st.download_button(
+                        label="📥 下載 SHAP CSV",
+                        data=csv_data,
+                        file_name="shap_values_sample0.csv",
+                        mime="text/csv"
+)    
                 except Exception as e:
 
                     st.error(f"執行失敗：{e}")
