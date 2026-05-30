@@ -1,9 +1,6 @@
 streamlit
 python-dotenv
 mistralai
-streamlit
-python-dotenv
-mistralai
 pandas
 numpy
 scikit-learn
@@ -13,6 +10,7 @@ openpyxl
 joblib
 lightgbm
 xgboost
+shap
 langchain
 langchain-core
 langchain-mistralai
