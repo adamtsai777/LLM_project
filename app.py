@@ -23,7 +23,7 @@ from sklearn.impute import SimpleImputer
 
 import re
 import matplotlib.pyplot as plt
-import shap
+#import shap
 
 
 # 載入環境變數
@@ -237,8 +237,9 @@ with tab1:
                     # 區分數值欄位 / 類別欄位
                     # ---------------------------
                     numeric_features = X.select_dtypes(include=["int64", "float64"]).columns.tolist()
-                    categorical_features = X.select_dtypes(include=["object", "category"]).columns.tolist()
-                    
+                    categorical_features = X.select_dtypes(
+                        include=["object", "string", "category"]
+                    ).columns.tolist()
                     # ---------------------------
                     # 前處理
                     # ---------------------------
